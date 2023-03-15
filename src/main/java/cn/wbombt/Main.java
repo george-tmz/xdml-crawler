@@ -18,6 +18,7 @@ public class Main {
             httpclient.execute(httpGet, response -> {
                 final HttpEntity entity1 = response.getEntity();
                 System.out.println(EntityUtils.toString(entity1));
+                System.out.println("new feature");
                 return null;
             });
         } catch (IOException e) {
