@@ -34,18 +34,13 @@ public class Main {
             if (link.startsWith("//")) {
                 link = "https:" + link;
             }
-            //是否处理过
             if (processedLinks.contains(link)) {
                 continue;
             }
-            // 是要处理的
             if (isInterestingPage(link)) {
                 Document doc = httpGetAndParseHtml(link);
-                // 获取抓取页面的链接
-                ArrayList<Element> links = doc.select("a");
-                for (Element aTag : links) {
-                    linkPool.add(aTag.attr("href"));
-                }
+                // 获取页面的链接
+                doc.select("a").stream().map(aTag -> aTag.attr("href")).forEach(linkPool::add);
                 storeIntoDatabaseIfItIsNewsPage(doc);
                 processedLinks.add(link);
             }
