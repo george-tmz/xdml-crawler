@@ -11,7 +11,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.File;
 import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,31 +23,50 @@ import java.util.Set;
  * @author George
  */
 public class Main {
-    public static void main(String[] args) {
-        // 待处理的链接池
-        List<String> linkPool = new ArrayList<>();
-        //已处理过的连接池
-        Set<String> processedLinks = new HashSet<>();
-        linkPool.add("https://sina.cn/");
-        while (!linkPool.isEmpty()) {
-            //remove()函数返回被删除的元素
-            String link = linkPool.remove(linkPool.size() - 1);
-            //链接正确性检查
-            if (link.startsWith("//")) {
-                link = "https:" + link;
-            }
-            if (processedLinks.contains(link)) {
-                continue;
-            }
-            if (isInterestingPage(link)) {
-                Document doc = httpGetAndParseHtml(link);
-                // 获取页面的链接
-                doc.select("a").stream().map(aTag -> aTag.attr("href")).forEach(linkPool::add);
-                storeIntoDatabaseIfItIsNewsPage(doc);
-                processedLinks.add(link);
+    public static void main(String[] args) throws SQLException {
+        //链接数据库
+        File projectDir = new File(System.getProperty("basedir", System.getProperty("user.dir")));
+        String jdbcUrl = "jdbc:h2:file:" + new File(projectDir, "news").getAbsolutePath();
+//        System.out.println(jdbcUrl);
+        try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
+            // 待处理的链接池
+            List<String> linkPool = loadUrlFromDatabase(connection, "SELECT link from LINKS_TO_BE_PROCESSED");
+            //已处理过的连接池
+            Set<String> processedLinks = new HashSet<>(loadUrlFromDatabase(connection, "SELECT link from LINKS_ALREADY_PROCESSED"));
+            linkPool.add("https://sina.cn/");
+            String[] s = {};
+            float f = 1.1f;
+            short s1 = 1;
+            while (!linkPool.isEmpty()) {
+                //remove()函数返回被删除的元素
+                String link = linkPool.remove(linkPool.size() - 1);
+                //链接正确性检查
+                if (link.startsWith("//")) {
+                    link = "https:" + link;
+                }
+                if (processedLinks.contains(link)) {
+                    continue;
+                }
+                if (isInterestingPage(link)) {
+                    Document doc = httpGetAndParseHtml(link);
+                    // 获取页面的链接
+                    doc.select("a").stream().map(aTag -> aTag.attr("href")).forEach(linkPool::add);
+                    storeIntoDatabaseIfItIsNewsPage(doc);
+                    processedLinks.add(link);
+                }
             }
         }
+    }
 
+    private static List<String> loadUrlFromDatabase(Connection connection, String sql) throws SQLException {
+        List<String> results = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                results.add(resultSet.getString("link"));
+            }
+            return results;
+        }
     }
 
     private static void storeIntoDatabaseIfItIsNewsPage(Document doc) {
