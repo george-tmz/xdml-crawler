@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author George
@@ -25,20 +24,9 @@ public class Main {
         //链接数据库
         File projectDir = new File(System.getProperty("basedir", System.getProperty("user.dir")));
         String jdbcUrl = "jdbc:h2:file:" + new File(projectDir, "news").getAbsolutePath();
-
         try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
-            while (true) {
-                List<String> linkPool = loadUrlFromDatabase(connection, "SELECT link from LINKS_TO_BE_PROCESSED");
-                if (linkPool.isEmpty()) {
-                    break;
-                }
-                //remove()函数返回被删除的元素,同时删除数据库数据
-                String link = linkPool.remove(linkPool.size() - 1);
-                updateData(connection, link, "DELETE FROM LINKS_TO_BE_PROCESSED WHERE link = ?");
-                //链接正确性检查
-                if (link.startsWith("//")) {
-                    link = "https:" + link;
-                }
+            String link;
+            while ((link = getNextLinkThenDelete(connection)) != null) {
                 if (isLinkProcessed(connection, link)) {
                     continue;
                 }
@@ -54,19 +42,31 @@ public class Main {
 
     private static void parseUrlsFromPageAndStoreIntoDatabase(Connection connection, Document doc) {
         doc.select("a").stream().map(aTag -> aTag.attr("href")).forEach(href -> {
-            updateData(connection, href, "insert into LINKS_TO_BE_PROCESSED (LINK) values (?)");
+            if (!href.isEmpty() && !href.toLowerCase().startsWith("javascript") && !href.startsWith("#")) {
+                if (href.startsWith("//")) {
+                    href = "https:" + href;
+                }
+                updateData(connection, href, "insert into LINKS_TO_BE_PROCESSED (LINK) values (?)");
+            }
         });
     }
 
-    private static List<String> loadUrlFromDatabase(Connection connection, String sql) throws SQLException {
-        List<String> results = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+    private static String getNextLink(Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1")) {
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                results.add(resultSet.getString("link"));
+            if (resultSet.next()) {
+                return resultSet.getString(1);
             }
-            return results;
         }
+        return null;
+    }
+
+    private static String getNextLinkThenDelete(Connection connection) throws SQLException {
+        String link = getNextLink(connection);
+        if (link != null) {
+            updateData(connection, link, "DELETE FROM LINKS_TO_BE_PROCESSED WHERE link = ?");
+        }
+        return link;
     }
 
     private static void storeIntoDatabaseIfItIsNewsPage(Document doc) {

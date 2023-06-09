@@ -10,6 +10,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <flyway.version>9.8.1</flyway.version>
+        <database.url>jdbc:h2:file:C:\Users\George\Documents\workspace\java\xdmlcrawler\news</database.url>
     </properties>
 
     <profiles>
@@ -89,6 +91,11 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -124,6 +131,14 @@
                         <version>8.29</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+                <configuration>
+                    <url>${database.url}</url>
+                </configuration>
             </plugin>
         </plugins>
     </build>
