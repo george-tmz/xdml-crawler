@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @author George
@@ -33,7 +34,7 @@ public class Main {
                 if (isInterestingPage(link)) {
                     Document doc = httpGetAndParseHtml(link);
                     parseUrlsFromPageAndStoreIntoDatabase(connection, doc);
-                    storeIntoDatabaseIfItIsNewsPage(doc);
+                    storeIntoDatabaseIfItIsNewsPage(connection, doc, link);
                     updateData(connection, link, "insert into LINKS_ALREADY_PROCESSED (LINK) values (?)");
                 }
             }
@@ -69,10 +70,22 @@ public class Main {
         return link;
     }
 
-    private static void storeIntoDatabaseIfItIsNewsPage(Document doc) {
+    private static void storeIntoDatabaseIfItIsNewsPage(Connection connection, Document doc, String link) {
         ArrayList<Element> articleTags = doc.select("article");
         if (!articleTags.isEmpty()) {
-            System.out.println(articleTags.get(0).child(0).text());
+            String title = articleTags.get(0).child(0).text();
+            for (Element articleTag : articleTags) {
+                String content = articleTag.select("p").stream().map(Element::text).collect(Collectors.joining("\n"));
+                try(PreparedStatement statement =
+                        connection.prepareStatement("insert into news (title, content, url, created_at, modified_at) values (?,?,?,NOW(),NOW())")){
+                    statement.setString(1, title);
+                    statement.setString(2, content);
+                    statement.setString(3, link);
+                    statement.executeUpdate();
+                }catch (SQLException e){
+                    throw new RuntimeException();
+                }
+            }
         }
     }
 
