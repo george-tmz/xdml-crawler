@@ -6,10 +6,10 @@ import java.sql.*;
 /**
  * @author George
  */
-public class DataAccessObject {
+public class JdbcCrawlerDao implements CrawlerDao {
     private final Connection connection;
 
-    public DataAccessObject() {
+    public JdbcCrawlerDao() {
         try {
             File projectDir = new File(System.getProperty("basedir", System.getProperty("user.dir")));
             String jdbcUrl = "jdbc:h2:file:" + new File(projectDir, "news").getAbsolutePath();
@@ -19,6 +19,7 @@ public class DataAccessObject {
         }
     }
 
+    @Override
     public String getNextLink() throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1")) {
             ResultSet resultSet = statement.executeQuery();
@@ -29,6 +30,7 @@ public class DataAccessObject {
         return null;
     }
 
+    @Override
     public String getNextLinkThenDelete() throws SQLException {
         String link = getNextLink();
         if (link != null) {
@@ -37,6 +39,7 @@ public class DataAccessObject {
         return link;
     }
 
+    @Override
     public void updateData(String link, String sql) {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, link);
@@ -46,6 +49,7 @@ public class DataAccessObject {
         }
     }
 
+    @Override
     public void insertNewsIntoData(String url, String title, String content) {
         try (PreparedStatement statement = connection.prepareStatement("insert into news (title, content, url, created_at, modified_at) values (?,?,?,NOW(),NOW())")) {
             statement.setString(1, title);
@@ -57,6 +61,7 @@ public class DataAccessObject {
         }
     }
 
+    @Override
     public boolean isLinkProcessed(String link) {
         try (PreparedStatement statement = connection.prepareStatement("SELECT link FROM LINKS_ALREADY_PROCESSED WHERE link = ?")) {
             statement.setString(1, link);

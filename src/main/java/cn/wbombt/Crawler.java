@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class Crawler {
 
-    DataAccessObject dao = new DataAccessObject();
+    CrawlerDao dao = new JdbcCrawlerDao();
 
     public void run() throws SQLException {
         String link;
