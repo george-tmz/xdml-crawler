@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class Crawler {
 
-    CrawlerDao dao = new JdbcCrawlerDao();
+    CrawlerDao dao = new MyBatisCrawlerDao();
 
     public void run() throws SQLException {
         String link;
@@ -33,7 +33,8 @@ public class Crawler {
                 Document doc = httpGetAndParseHtml(link);
                 parseUrlsFromPageAndStoreIntoDatabase(doc);
                 storeIntoDatabaseIfItIsNewsPage(doc, link);
-                dao.updateData(link, "insert into LINKS_ALREADY_PROCESSED (LINK) values (?)");
+                System.out.println(link);
+                dao.insertProcessedLink(link);
             }
         }
 
@@ -50,7 +51,7 @@ public class Crawler {
                 if (href.startsWith("//")) {
                     href = "https:" + href;
                 }
-                dao.updateData(href, "insert into LINKS_TO_BE_PROCESSED (LINK) values (?)");
+                dao.insertLinkToBeProcessedLink(href);
             }
         });
     }
@@ -60,6 +61,7 @@ public class Crawler {
         ArrayList<Element> articleTags = doc.select("article");
         if (!articleTags.isEmpty()) {
             String title = articleTags.get(0).child(0).text();
+            System.out.println(title);
             for (Element articleTag : articleTags) {
                 String content = articleTag.select("p").stream().map(Element::text).collect(Collectors.joining("\n"));
                 dao.insertNewsIntoData(link, title, content);

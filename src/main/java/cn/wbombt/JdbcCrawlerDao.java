@@ -19,8 +19,7 @@ public class JdbcCrawlerDao implements CrawlerDao {
         }
     }
 
-    @Override
-    public String getNextLink() throws SQLException {
+    private String getNextLink() throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1")) {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -39,14 +38,23 @@ public class JdbcCrawlerDao implements CrawlerDao {
         return link;
     }
 
-    @Override
-    public void updateData(String link, String sql) {
+    private void updateData(String link, String sql) {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, link);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void insertProcessedLink(String link) {
+
+    }
+
+    @Override
+    public void insertLinkToBeProcessedLink(String link) {
+
     }
 
     @Override

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wbombt.MyMapper">
+    <select id="selectNextAvailable" resultType="String">
+        SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1
+    </select>
+    <delete id="deleteLink" parameterType="String">
+        DELETE FROM LINKS_TO_BE_PROCESSED WHERE link = #{link}
+    </delete>
+
+    <insert id="insertProcessedLink" parameterType="String">
+        insert into LINKS_ALREADY_PROCESSED (LINK) values (#{link})
+    </insert>
+    <insert id="insertLinkToBeProcessedLink" parameterType="String">
+        insert into LINKS_TO_BE_PROCESSED (LINK) values (#{link})
+    </insert>
+    <insert id="insertNews" parameterType="cn.wbombt.News">
+        insert into news (title, content, url, created_at, modified_at)
+        values (#{title},#{content},#{url},NOW(),NOW())
+    </insert>
+    <select id="countLink" parameterType="String" resultType="int">
+        SELECT count(link) as counts from LINKS_ALREADY_PROCESSED where link = #{link}
+    </select>
+</mapper>

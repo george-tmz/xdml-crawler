@@ -6,11 +6,11 @@ import java.sql.SQLException;
  * @author George
  */
 public interface CrawlerDao {
-    String getNextLink() throws SQLException;
-
     String getNextLinkThenDelete() throws SQLException;
 
-    void updateData(String link, String sql);
+    void insertProcessedLink(String link);
+
+    void insertLinkToBeProcessedLink(String link);
 
     void insertNewsIntoData(String url, String title, String content);
 
