@@ -1,20 +1,20 @@
-create table LINKS_ALREADY_PROCESSED
+create table links_already_processed
 (
     link varchar(2000)
 );
-create table LINKS_TO_BE_PROCESSED
+create table links_to_be_processed
 (
     link varchar(2000)
 );
-create table NEWS
+create table news
 (
-    ID          bigint auto_increment primary key,
-    TITLE       text,
-    CONTENT     text,
-    URL         varchar(2000),
-    CREATED_AT  TIMESTAMP,
-    MODIFIED_AT TIMESTAMP
+    id          bigint auto_increment primary key,
+    title       text,
+    content     text,
+    url         varchar(2000),
+    created_at  timestamp default now(),
+    modified_at timestamp default now()
 );
 
-insert into LINKS_TO_BE_PROCESSED (LINK)
+insert into links_to_be_processed (link)
 values ('https://sina.cn/');

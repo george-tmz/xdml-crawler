@@ -19,11 +19,16 @@ import java.util.stream.Collectors;
 /**
  * @author George
  */
-public class Crawler {
+public class Crawler extends Thread {
 
-    CrawlerDao dao = new MyBatisCrawlerDao();
+    private final CrawlerDao dao;
 
-    public void run() throws SQLException {
+    public Crawler(CrawlerDao dao) {
+        this.dao = dao;
+    }
+
+    @Override
+    public void run() {
         String link;
         while ((link = dao.getNextLinkThenDelete()) != null) {
             if (dao.isLinkProcessed(link)) {
@@ -37,12 +42,6 @@ public class Crawler {
                 dao.insertProcessedLink(link);
             }
         }
-
-    }
-
-    public static void main(String[] args) throws SQLException {
-        //链接数据库
-        new Crawler().run();
     }
 
     private void parseUrlsFromPageAndStoreIntoDatabase(Document doc) {

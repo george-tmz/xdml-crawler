@@ -19,18 +19,20 @@ public class JdbcCrawlerDao implements CrawlerDao {
         }
     }
 
-    private String getNextLink() throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1")) {
+    private String getNextLink() {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT link from links_to_be_processed LIMIT 1")) {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getString(1);
             }
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
         return null;
     }
 
     @Override
-    public String getNextLinkThenDelete() throws SQLException {
+    public String getNextLinkThenDelete() {
         String link = getNextLink();
         if (link != null) {
             updateData(link, "DELETE FROM LINKS_TO_BE_PROCESSED WHERE link = ?");

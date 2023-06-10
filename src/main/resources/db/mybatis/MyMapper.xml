@@ -4,23 +4,23 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.wbombt.MyMapper">
     <select id="selectNextAvailable" resultType="String">
-        SELECT link from LINKS_TO_BE_PROCESSED LIMIT 1
+        SELECT link from links_to_be_processed LIMIT 1
     </select>
     <delete id="deleteLink" parameterType="String">
-        DELETE FROM LINKS_TO_BE_PROCESSED WHERE link = #{link}
+        DELETE FROM links_to_be_processed WHERE link = #{link}
     </delete>
 
     <insert id="insertProcessedLink" parameterType="String">
-        insert into LINKS_ALREADY_PROCESSED (LINK) values (#{link})
+        insert into links_already_processed (link) values (#{link})
     </insert>
     <insert id="insertLinkToBeProcessedLink" parameterType="String">
-        insert into LINKS_TO_BE_PROCESSED (LINK) values (#{link})
+        insert into links_to_be_processed (link) values (#{link})
     </insert>
     <insert id="insertNews" parameterType="cn.wbombt.News">
         insert into news (title, content, url, created_at, modified_at)
         values (#{title},#{content},#{url},NOW(),NOW())
     </insert>
     <select id="countLink" parameterType="String" resultType="int">
-        SELECT count(link) as counts from LINKS_ALREADY_PROCESSED where link = #{link}
+        SELECT count(link) as counts from links_already_processed where link = #{link}
     </select>
 </mapper>
