@@ -8,6 +8,6 @@
         values (#{title},#{content},#{url},#{createdAt}, #{modifiedAt})
     </insert>
     <select id="selectNews" resultType="cn.wbombt.News">
-        select id, url, title,content,created_at, modified_at from news
+        select id, url, title,content,created_at, modified_at from news LIMIT 2000
     </select>
 </mapper>
