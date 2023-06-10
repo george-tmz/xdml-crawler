@@ -1,5 +1,7 @@
 package cn.wbombt;
 
+import java.time.Instant;
+
 public class News {
 
     private long id;
@@ -8,6 +10,9 @@ public class News {
     private String title;
 
     private String content;
+
+    private Instant createdAt;
+    private Instant modifiedAt;
 
     public long getId() {
         return id;
@@ -35,5 +40,21 @@ public class News {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Instant modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

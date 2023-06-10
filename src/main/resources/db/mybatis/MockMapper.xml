@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.wbombt.MockMapper">
+    <insert id="insertNews" parameterType="cn.wbombt.News">
+        insert into news (title, content, url, created_at, modified_at)
+        values (#{title},#{content},#{url},#{createdAt}, #{modifiedAt})
+    </insert>
+    <select id="selectNews" resultType="cn.wbombt.News">
+        select id, url, title,content,created_at, modified_at from news
+    </select>
+</mapper>
